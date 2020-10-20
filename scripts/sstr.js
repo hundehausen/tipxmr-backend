@@ -21,7 +21,7 @@ const socket = io("http://localhost:3000/streamer");
  * Dispatches an update of new animation settings
  * 
  * Example:
- * .update { "fontColor": "red" }
+ * .update { "color": "red" }
  */
 replServer.defineCommand("update", {
   action(line) {
