@@ -24,6 +24,7 @@ const alex = {
     category: "politics",
   },
   animationSettings: {
+    animationSocketId: "",
     secondPrice: 0.00042, // XMR price of a second of display time
     fontColor: "#FFFFFF", // fontColor of the animation text
     fontSize: "text-4xl", // size of animation text

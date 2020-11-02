@@ -6,6 +6,7 @@ const http = require("http");
 const SocketIO = require("socket.io");
 
 const db = require("./db");
+const { assocPath } = require("ramda");
 
 const app = express();
 const server = http.createServer(app);
@@ -157,19 +158,37 @@ donatorNamespace.on("connection", (socket) => {
 
 animationNamespace.on("connection", (socket) => {
   socket.on("getAnimationConfig", (streamerName) => {
-    onGetAnimationConfig(socket.id, streamerName);
+    // update the animationSocketId
+    db.getStreamerByUsername(streamerName)
+      .then((streamers) => streamers.docs[0]) // get the first document
+      .then((requestedStreamer) => {
+        console.log("before update: ", requestedStreamer);
+
+        // make sure animationSettings exist, if not, fill
+        const streamer = assocPath(
+          ["animationSettings", "animationSocketId"],
+          socket.id,
+          requestedStreamer
+        );
+
+        // let animationSettings =
+        //   requestedStreamer.docs[0]?.animationSettings ?? {};
+        // animationSettings.animationSocketId = socket.id;
+        // requestedStreamer.animationSettings.animationSocketId = socket.id;
+
+        db.updateStreamer(streamer).then(() => {
+          socket.emit("getAnimationConfig", streamer.animationSettings);
+          console.log("after update: ", streamer);
+        });
+      });
+  });
+
+  // streamer disconnects
+  // copied from StreamerNamespace
+  socket.on("disconnect", () => {
+    onStreamerDisconnectOrTimeout(socket);
   });
 });
-
-async function onGetAnimationConfig(donatorSocketId, userName) {
-  const requestedStreamer = await db.getStreamerByUsername(userName);
-  // strip down relevant information for donator
-  // only if array is not empty
-  let animationSettings = requestedStreamer.docs[0]?.animationSettings ?? {};
-  animationNamespace
-    .to(donatorSocketId)
-    .emit("getAnimationConfig", animationSettings);
-}
 
 // ===============================================================
 // All Functions
@@ -204,9 +223,14 @@ function onPaymentRecieved(newDonation) {
       " to " +
       newDonation.displayName
   );
+  console.log("donation: ", newDonation);
   donatorNamespace
     .to(newDonation.donatorSocketId)
     .emit("paymentConfirmation", newDonation);
+  // send information to the Animation component
+  animationNamespace
+    .to(newDonation.animationSocketId)
+    .emit("donationConfirmation", newDonation);
 }
 
 // donator callbacks
