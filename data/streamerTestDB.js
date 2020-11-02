@@ -67,7 +67,7 @@ const grischa = {
     category: "XXX",
   },
   animationSettings: {
-    secondPrice: 0.0042, // XMR price of a second of display time
+    animationSocketId: "",
     fontColor: "#F23456", // fontColor of the animation text
     fontSize: "xl", // size of animation text
     fontShadow: false, // enable a shadow around text
@@ -108,6 +108,8 @@ const jonas = {
     category: "technology",
   },
   animationSettings: {
+    animationSocketId: "",
+    secondPrice: 0.0042, // XMR price of a second of display time
     secondPrice: 0, // XMR price of a second of display time
     fontColor: "#F23456", // fontColor of the animation text
     fontSize: "xl", // size of animation text
